@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "name": "Snargol",
+    "role": 0,
+    "jwt": ""
+  },
+  {
+    "id": 2,
+    "name": "Euxiniar",
+    "role": 1,
+    "jwt": ""
+  }
+]
