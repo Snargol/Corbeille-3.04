@@ -1,30 +1,32 @@
 var express = require('express');
-const res = require("express");
 var router = express.Router();
-const {createJWT, verifyJWT} = require('../modules/jwt')
-const User =require('./schemas/user');
+var crypto = require("crypto");
+const {createJWT, checkJWT} = require('../modules/jwt')
+const User = require('../schemas/users');
 const currentUserName = 'Snargol';
+const Commune = require('../schemas/communes');
 
 // CREATE JWT
-router.get('/create'), function(req, nes, next){
-    let token = createJWT({name: req.params.name, role: 1});
+router.get('/create', (req, res, next) => {
+    let token = createJWT({name: req.query.name, role: 1});
     let refreshToken = createRefreshToken();
     res.json({token, refreshToken});
-}
+});
 
 // CHECK JWT
-router.get('/verify/:token'), function(req, nes, next){
-    let check = verifyJWT(req.params.token);
+router.get('/verify', (req, res, next) => {
+    let check = checkJWT(req.query.token);
+    let token;
+    let refreshToken;
     if (check === 'renew') {
         const user = getUser(currentUserName);
-        let token = createJWT({name: user.name, role: user.role});
-        let refreshToken = createRefreshToken();
+        token = createJWT({name: user.name, role: user.role});
+        refreshToken = createRefreshToken();
         res.json({check, token, refreshToken})
     } else {
         res.json({check, token, refreshToken})
     }
-    res.json(check);
-}
+});
 
 const storeJWTInDB = function (name, jwt) {
     const filter = {name};

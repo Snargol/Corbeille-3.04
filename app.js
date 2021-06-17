@@ -4,9 +4,12 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 const app = express();
+const {checkRequestRight} = require('./services/auth.ts')
 
-const Commune =require('./schemas/communes');
+const usersRouter =require('./routes/users');
 const communesRouter =require('./routes/communes');
+const restaurantsRouter =require('./routes/restaurants');
+const secureRouter = require('./routes/secure');
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,7 +24,19 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+app.use('/users', usersRouter);
 app.use('/communes', communesRouter);
+
+app.use('/restaurants', function (req, res, next) {
+    checkRequestRight(req, res, next, app);
+});
+app.use('/restaurants', restaurantsRouter);
+
+app.use('/secure', function (req, res, next) {
+    checkRequestRight(req, res, next, app);
+});
+app.use('/secure', secureRouter);
 
 const uri = 'mongodb+srv://user1:user1@cluster0.ak193.mongodb.net/myFirstDatabase?retryWrites=true/A4L2/';
 mongoose.connect(uri,
@@ -74,10 +89,10 @@ module.exports = app;
 //     next();
 // });
 
-// app.use((req, res, next) => {
-//     res.json({message: 'Votre requête a bien été reçue !!!!'});
-//     next();
-// });
+app.use((req, res, next) => {
+    checkRequestRight(req, res, next, app);
+    // next();
+});
 
 // app.use((req, res, next) => {
 //     console.log('Réponse envoyée avec succès !');
